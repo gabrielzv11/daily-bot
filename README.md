@@ -1,6 +1,6 @@
 # daily-bot
 
-Bot que monta o resumo da daily de um desenvolvedor. Todo dia útil, de madrugada (agendado para 02:17, horário de Brasília — o GitHub pode atrasar execuções agendadas, às vezes por horas), coleta os commits do dia útil anterior nos repositórios monitorados, resume com IA (Gemini ou Mangaba Router) e publica o resultado como **issue** neste repositório e, opcionalmente, como **nota no vault do Obsidian**.
+Bot que resume as tarefas de desenvolvimento: um resumo do que foi feito. Todo dia útil, de madrugada (agendado para 02:17, horário de Brasília — o GitHub pode atrasar execuções agendadas, às vezes por horas), coleta os commits do dia útil anterior nos repositórios monitorados, resume com IA (Gemini ou Mangaba Router) e publica o resultado como **issue** neste repositório e, opcionalmente, como **nota no vault do Obsidian**.
 
 ## Sumário
 
@@ -225,7 +225,7 @@ Edite a variable `GH_REPOS` ([formato](#formato-de-gh_repos), [exemplo](#exemplo
 
 **Quais commits entram**
 
-- **Push atrasado se perde.** A janela usa a data do commit, não a do push, e o bot não guarda estado entre execuções. Um commit feito na sexta e enviado na segunda depois da execução das 02:17 não aparece em nenhuma daily.
+- **Push atrasado se perde.** A janela usa a data do commit, não a do push, e o bot não guarda estado entre execuções. Um commit feito na sexta e enviado na segunda depois da execução das 02:17 não aparece em nenhum resumo.
 - **Rebase, amend e cherry-pick reaparecem.** Eles reescrevem a data do commit, então trabalho antigo volta como se fosse do dia anterior.
 - **Squash merge conta duas vezes.** Os commits da branch entram no dia em que foram feitos, e o commit de squash, que não é tratado como merge, entra de novo no dia do merge.
 - **Só commits do login de `GH_AUTHOR`.** Commits feitos com um e-mail que não está vinculado à conta do GitHub não são encontrados, e não há aviso.
