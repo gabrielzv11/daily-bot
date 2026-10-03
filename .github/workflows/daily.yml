@@ -1,0 +1,52 @@
+name: Resumo diário
+
+on:
+  schedule:
+    # ~02:17 em Brasília (UTC-3), de segunda a sexta. Minuto fora do topo da hora
+    # e madrugada: o Actions atrasa cron em horários cheios (pico de carga).
+    - cron: '17 5 * * 1-5'
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Dia a resumir, AAAA-MM-DD (vazio = dia útil anterior)'
+        required: false
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  resumo:
+    # Sem configuração (ex.: cópia recém-criada do template), o job é pulado em vez de falhar todo dia
+    if: vars.GH_REPOS != ''
+    runs-on: ubuntu-latest
+    # Teto para requisições penduradas; uma execução normal leva poucos minutos
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      # Fixado por SHA (tag é mutável): esta action instala o binário que roda com os secrets.
+      # O Dependabot (.github/dependabot.yml) abre PR quando houver versão nova.
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+        with:
+          bun-version: 1.4.2
+      - run: bun run src/index.ts
+        env:
+          # Todos os secrets em JSON: o bot escolhe o token de cada dono (GH_TOKEN_<DONO>).
+          # Secret novo não exige editar este arquivo.
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+          GEMINI_MAX_OUTPUT_TOKENS: ${{ vars.GEMINI_MAX_OUTPUT_TOKENS }}
+          GEMINI_THINKING_BUDGET: ${{ vars.GEMINI_THINKING_BUDGET }}
+          SUMMARY_PROVIDER: ${{ vars.SUMMARY_PROVIDER }}
+          MANGABA_API_KEY: ${{ secrets.MANGABA_API_KEY }}
+          MANGABA_MODEL: ${{ vars.MANGABA_MODEL }}
+          MANGABA_BASE_URL: ${{ vars.MANGABA_BASE_URL }}
+          MANGABA_MAX_TOKENS: ${{ vars.MANGABA_MAX_TOKENS }}
+          GH_AUTHOR: ${{ vars.GH_AUTHOR }}
+          # Repos e destino de cada um: formato no README
+          GH_REPOS: ${{ vars.GH_REPOS }}
+          DOCS_FOLDER: ${{ vars.DOCS_FOLDER }}
+          DOCS_BRANCH: ${{ vars.DOCS_BRANCH }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TARGET_DATE: ${{ inputs.date }}
